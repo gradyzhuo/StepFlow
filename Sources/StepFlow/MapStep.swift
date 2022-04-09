@@ -58,6 +58,7 @@ open class MapStep<Value, Output>: Step, Propagatable{
                     return outcomes
                 }).reduce(Intents.empty){
                     var results = $0
+                    print("results")
                     for command in $0.commands{
                         if let intents:[Intent] = $0[command]{
                             results[command] = intents + [$1[command]]
