@@ -62,7 +62,7 @@ open class SimpleStep : Step, CustomStringConvertible, Workable, Identitiable {
     }
     
     public func run(with inputs: Intents = []) async throws ->Intents{
-        return  try await withThrowingTaskGroup(of: Intents.self, returning: [Intents].self, body: { group in
+        return try await withThrowingTaskGroup(of: Intents.self, returning: [Intents].self, body: { group in
             for duty in self.duties {
                 group.addTask {
                     try await duty.run(with: inputs, inQueue: self.queue)

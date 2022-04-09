@@ -41,7 +41,7 @@ public protocol Step {
     
     var name: String { set get }
     
-    func run(with intents: Intents) async throws ->Intents
+    func run(with inputs: Intents) async throws ->Intents
 }
 
 extension Step {
@@ -70,6 +70,12 @@ extension Step {
     public func run(with inputs: Intent...) async throws ->Intents {
         return try await self.run(with: Intents(array: inputs))
     }
+    
+    public func run(with inputs: Intents, reserverdInputIntents:Bool) async throws ->Intents{
+        let results = try await self.run(with: inputs)
+        return reserverdInputIntents ? inputs + results : results
+    }
+    
 }
 
 //MARK: - protocol Propagatable

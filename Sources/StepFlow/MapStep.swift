@@ -25,7 +25,7 @@ open class MapStep<Value>: Step{
         self.operation = operation
         self.queue = DispatchQueue.global()
     }
-
+    
     public func run(with inputs: Intents = []) async throws ->Intents{
         guard let values:[Value] = inputs[wrappedCommand] else{
             print("XXX")
@@ -33,8 +33,7 @@ open class MapStep<Value>: Step{
         }
         
         let duties = values.map{ _ in Duty(do: self.operation) }
-        
-        return  try await withThrowingTaskGroup(of: Intents.self, returning: [Intents].self, body: { group in
+        return try await withThrowingTaskGroup(of: Intents.self, returning: [Intents].self, body: { group in
             for (offset, duty) in duties.enumerated(){
                 group.addTask {
                     let value = values[offset]
