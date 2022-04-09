@@ -7,30 +7,30 @@
 
 import Foundation
 
-class MapStep<Value>: Step, Propagatable{
-    var duties: [Duty] = []
-    var operation: Duty.Operation
+open class MapStep<Value>: Step, Propagatable{
+    public var duties: [Duty] = []
+    public var operation: Duty.Operation
     
-    var name: String = ""
-    var previous: Step?
-    var next: Step?
+    public var name: String = ""
+    public var previous: Step?
+    public var next: Step?
     
-    var wrappedCommand: String
-    var unwrappedCommand: String
-    var queue: DispatchQueue
+    public var wrappedCommand: String
+    public var unwrappedCommand: String
+    public var queue: DispatchQueue
     
-    init(wrapped wrappedCommand: String, unwrapped unwrappedCommand: String, do operation: @escaping Duty.Operation){
+    public init(wrapped wrappedCommand: String, unwrapped unwrappedCommand: String, do operation: @escaping Duty.Operation){
         self.wrappedCommand = wrappedCommand
         self.unwrappedCommand = unwrappedCommand
         self.operation = operation
         self.queue = DispatchQueue.global()
     }
     
-    func run(with intents: Intents) {
+    public func run(with intents: Intents) {
         self.run(with: intents, direction: .forward)
     }
     
-    func run(with intents: Intents, direction: Duty.PropagationDirection) {
+    public func run(with intents: Intents, direction: Duty.PropagationDirection) {
         guard let values:[Value] = intents[wrappedCommand] else{
             return
         }
