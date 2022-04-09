@@ -84,6 +84,20 @@ public struct Intents {
     
     //MARK: - subscript
     
+    public subscript(name: String)->IntentType? {
+        set{
+            do{
+                try self.add(intent: newValue)
+            }catch{
+                print(error)
+            }
+        }
+        
+        get{
+            return intent(for: name)
+        }
+    }
+    
     public subscript<T>(name: String)->T? {
         set{
             let intent = SimpleIntent(command: name, value: newValue)

@@ -7,7 +7,7 @@
 
 import Foundation
 
-open class MapStep<Value>: Step, Propagatable{
+open class MapStep<Value, Output>: Step, Propagatable{
     public var duties: [Duty] = []
     public var operation: Duty.Operation
     
@@ -57,7 +57,15 @@ open class MapStep<Value>: Step, Propagatable{
                     }
                     return outcomes
                 }).reduce(Intents.empty){
-                    $0 + $1
+                    var results = $0
+                    for command in $0.commands{
+                        if let intents:[Intent] = $0[command]{
+                            results[command] = intents + [$1[command]]
+                        }else{
+                            results[command] = [$1[command]]
+                        }
+                    }
+                    return results
                 }
                 
                 print("outputs:", outputs)
