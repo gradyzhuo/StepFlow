@@ -53,6 +53,7 @@ open class MapStep<Value, Output>: Step, Propagatable{
                     
                     var outcomes: [Intents] = []
                     for try await result in group {
+                        print("xxxx:", result)
                         outcomes.append(result)
                     }
                     return outcomes
