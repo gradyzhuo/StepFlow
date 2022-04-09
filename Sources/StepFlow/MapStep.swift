@@ -32,6 +32,7 @@ open class MapStep<Value>: Step, Propagatable{
     
     public func run(with intents: Intents, direction: Duty.PropagationDirection) {
         guard let values:[Value] = intents[wrappedCommand] else{
+            print("XXX")
             return
         }
         
