@@ -56,7 +56,7 @@ public struct Intents {
         return commands.contains(intent.command)
     }
     
-    public func intent(for name: String)-> IntentType! {
+    public func intent(for name: String)-> IntentType? {
         return storage[name]
     }
     
@@ -95,7 +95,7 @@ public struct Intents {
         }
         
         get{
-            return intent(for: name).value as? T
+            return intent(for: name)?.value as? T
         }
         
     }
