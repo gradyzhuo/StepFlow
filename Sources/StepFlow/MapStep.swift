@@ -7,7 +7,7 @@
 
 import Foundation
 
-open class MapStep<Value:Collection>: Step where Value.Index == Int{
+open class MapStep<Value>: Step{
     
 //    public var duties: [Duty] = []
 //    public typealias Value = [[String:String]]
@@ -30,7 +30,7 @@ open class MapStep<Value:Collection>: Step where Value.Index == Int{
     
     
     public func run(with inputs: Intents) async throws -> Intents {
-        guard let values:Value = inputs[wrappedCommand] else{
+        guard let values:[Value] = inputs[wrappedCommand] else{
             return Intents.empty
         }
         
@@ -64,9 +64,9 @@ open class MapStep<Value:Collection>: Step where Value.Index == Int{
 
 }
 
-extension MapStep where Value.Element == [String:String]{
+extension MapStep where Value == [String:String]{
     public func run(with inputs: Intents = []) async throws ->Intents{
-        guard let values:Value = inputs[wrappedCommand] else{
+        guard let values:[Value] = inputs[wrappedCommand] else{
             return Intents.empty
         }
         
