@@ -52,10 +52,13 @@ open class MapStep<Value>: Step{
         }).reduce(Intents.empty){
             var results = $0
             for command in $1.commands{
-                if let intents:[Intent] = $0[command]{
-                    results[command] = intents + [$1[command]]
+                guard let value:Any = $1[command]?.value else{
+                    return results
+                }
+                if let values:[Any] = $0[self.unwrappedCommand]{
+                    results[self.unwrappedCommand] = values + [value]
                 }else{
-                    results[command] = [$1[command]]
+                    results[command] = [value]
                 }
             }
             return results
@@ -90,10 +93,13 @@ extension MapStep where Value == [String:String]{
         }).reduce(Intents.empty){
             var results = $0
             for command in $1.commands{
-                if let intents:[Intent] = $0[command]{
-                    results[command] = intents + [$1[command]]
+                guard let value:Any = $1[command]?.value else{
+                    return results
+                }
+                if let values:[Any] = $0[self.unwrappedCommand]{
+                    results[self.unwrappedCommand] = values + [value]
                 }else{
-                    results[command] = [$1[command]]
+                    results[command] = [value]
                 }
             }
             return results
