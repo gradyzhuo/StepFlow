@@ -33,7 +33,7 @@ public protocol Flowable {
     
     var last:Step { get }
     
-    mutating func `continue`<T: Step>(with step:T, asLast: Bool, copy:Bool)->T where T:Copyable
+    mutating func `continue`<T: Step>(with step:T, asLast: Bool)->T
 }
 
 
@@ -62,26 +62,12 @@ extension Step {
          - asLast: to be a next step after last step
      */
     @discardableResult
-    public func `continue`<T>(with step:T, asLast: Bool = true, copy: Bool = false)->T where T : Step , T:Copyable{
-        var step = step
-        if copy{
-            step = step.copy
-        }
+    public func `continue`<T>(with step:T, asLast: Bool = true)->T where T : Step {
         var last = asLast ? self.last : self
         last.next = step
         return step
     }
 
-}
-
-public protocol Copyable : class, NSCopying{ }
-
-extension Copyable {
-    
-    public var copy: Self {
-        return self.copy(with: nil) as! Self
-    }
-    
 }
 
 //MARK: - protocol Propagatable

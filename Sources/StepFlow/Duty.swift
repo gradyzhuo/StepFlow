@@ -116,13 +116,3 @@ open class Duty : Identitiable, Hashable, CustomStringConvertible {
 public func ==(lhs: Duty, rhs: Duty)->Bool{
     return lhs.identifier == rhs.identifier
 }
-
-extension Duty : Copyable {
-    
-    public func copy(with zone: NSZone? = nil) -> Any {
-        let taskCopy = self.operation
-        return Duty(identifier: identifier, do: taskCopy)
-    }
-    
-    
-}

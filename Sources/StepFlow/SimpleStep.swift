@@ -185,15 +185,15 @@ public func ==<T:Hashable>(lhs: T, rhs: T)->Bool{
     return lhs.hashValue == rhs.hashValue
 }
 
-extension SimpleStep : Copyable{
-    
-    public func copy(with zone: NSZone? = nil) -> Any {
-        let dutiesCopy = self.duties.map{ $0.copy }
-        let aCopy = SimpleStep(duties: dutiesCopy, attributes: attributes, autoreleaseFrequency: autoreleaseFrequency, qos: qos)
-        aCopy.flowHandler = flowHandler
-        return aCopy
-    }
-}
+//extension SimpleStep : Copyable{
+//    
+//    public func copy(with zone: NSZone? = nil) -> Any {
+//        let dutiesCopy = self.duties.map{ $0.copy }
+//        let aCopy = SimpleStep(duties: dutiesCopy, attributes: attributes, autoreleaseFrequency: autoreleaseFrequency, qos: qos)
+//        aCopy.flowHandler = flowHandler
+//        return aCopy
+//    }
+//}
 
 extension SimpleStep {
 
