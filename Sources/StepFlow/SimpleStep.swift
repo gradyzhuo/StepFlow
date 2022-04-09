@@ -82,18 +82,7 @@ open class SimpleStep : Step, Propagatable, Flowable, CustomStringConvertible, I
     }
 
     public func run(with inputs: Intents, direction: Duty.PropagationDirection){
-        let workItem = self._run(with: inputs, direction: direction)
-        self.queue.sync(execute: workItem)
-    }
-    
-    public func cancel(){
-        for act in duties {
-            act.cancel()
-        }
-    }
-    
-    internal func _run(with inputs: Intents, direction: Duty.PropagationDirection)->DispatchWorkItem{
-        return DispatchWorkItem {
+        let workItem = DispatchWorkItem {
             Task{
                 let outputs = try await withThrowingTaskGroup(of: Intents.self, returning: [Intents].self, body: { group in
                     for duty in self.duties.filter({ $0.propagationDirection == direction }) {
@@ -112,6 +101,13 @@ open class SimpleStep : Step, Propagatable, Flowable, CustomStringConvertible, I
                 }
                 self.actionsDidFinish(original: inputs, outputs: outputs)
             }
+        }
+        self.queue.sync(execute: workItem)
+    }
+    
+    public func cancel(){
+        for act in duties {
+            act.cancel()
         }
     }
     

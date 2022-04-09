@@ -90,7 +90,6 @@ open class Duty : Identitiable, Hashable, CustomStringConvertible {
     
         return outcome ?? Intents.empty
         
-        
     }
     
     

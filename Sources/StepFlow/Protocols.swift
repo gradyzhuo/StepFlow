@@ -89,8 +89,7 @@ extension Copyable {
 public protocol Propagatable : Step{
     var duties: [Duty] { get }
     
-    init(duties: [Duty])
-    
+//    init(duties: [Duty])
     func run(with intents: Intents, direction: Duty.PropagationDirection)
 }
 
