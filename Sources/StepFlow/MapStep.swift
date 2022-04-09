@@ -7,8 +7,8 @@
 
 import Foundation
 
-open class MapStep<Value, Output>: Step, Propagatable{
-    public var duties: [Duty] = []
+open class MapStep<Value>: Step{
+//    public var duties: [Duty] = []
     public var operation: Duty.Operation
     
     public var name: String = ""
@@ -25,56 +25,43 @@ open class MapStep<Value, Output>: Step, Propagatable{
         self.operation = operation
         self.queue = DispatchQueue.global()
     }
-    
-    public func run(with intents: Intents) {
-        self.run(with: intents, direction: .forward)
-    }
-    
-    public func run(with intents: Intents, direction: Duty.PropagationDirection) {
-        guard let values:[Value] = intents[wrappedCommand] else{
+
+    public func run(with inputs: Intents = []) async throws ->Intents{
+        guard let values:[Value] = inputs[wrappedCommand] else{
             print("XXX")
-            return
+            return Intents.empty
         }
         
-        self.duties = values.map{ _ in Duty(do: self.operation) }
+        let duties = values.map{ _ in Duty(do: self.operation) }
         
-        
-        let workItem = DispatchWorkItem {
-            Task{
-                let outputs = try await withThrowingTaskGroup(of: Intents.self, returning: [Intents].self, body: { group in
-                    for (offset, duty) in self.duties.enumerated(){
-                        group.addTask {
-                            let value = values[offset]
-                            var inputs = Intents(intents: intents)
-                            inputs[self.unwrappedCommand] = value
-                            return try await duty.run(with: inputs, inQueue: self.queue)
-                        }
-                    }
-                    
-                    var outcomes: [Intents] = []
-                    for try await result in group {
-                        outcomes.append(result)
-                    }
-                    return outcomes
-                }).reduce(Intents.empty){
-                    var results = $0
-                    for command in $1.commands{
-                        if let intents:[Intent] = $0[command]{
-                            results[command] = intents + [$1[command]]
-                        }else{
-                            results[command] = [$1[command]]
-                        }
-                    }
-                    return results
+        return  try await withThrowingTaskGroup(of: Intents.self, returning: [Intents].self, body: { group in
+            for (offset, duty) in duties.enumerated(){
+                group.addTask {
+                    let value = values[offset]
+                    var inputs = Intents(intents: inputs)
+                    inputs[self.unwrappedCommand] = value
+                    return try await duty.run(with: inputs, inQueue: self.queue)
                 }
-                
-                print("outputs:", outputs)
             }
             
+            var outcomes: [Intents] = []
+            for try await result in group {
+                outcomes.append(result)
+            }
+            return outcomes
+        }).reduce(Intents.empty){
+            var results = $0
+            for command in $1.commands{
+                if let intents:[Intent] = $0[command]{
+                    results[command] = intents + [$1[command]]
+                }else{
+                    results[command] = [$1[command]]
+                }
+            }
+            return results
         }
-        
-        self.queue.sync(execute: workItem)
         
     }
     
+
 }

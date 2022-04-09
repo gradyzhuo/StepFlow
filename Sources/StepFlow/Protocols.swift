@@ -37,46 +37,48 @@ public protocol Flowable {
 }
 
 
-public protocol Step : Flowable {
+public protocol Step {
     
     var name: String { set get }
     
-    func run(with intents: Intents)
+    func run(with intents: Intents) async throws ->Intents
 }
 
 extension Step {
     
-    public var last:Step{
-        var nextStep: Step = self
-
-        while let next = nextStep.next {
-            nextStep = next
-        }
-        return nextStep
-    }
+//    public var last:Step{
+//        var nextStep: Step = self
+//
+//        while let next = nextStep.next {
+//            nextStep = next
+//        }
+//        return nextStep
+//    }
     
-    /**
-     設定接續的step，預設會串連在 last step 後面.
-     - parameters:
-         - with: the next step
-         - asLast: to be a next step after last step
-     */
-    @discardableResult
-    public func `continue`<T>(with step:T, asLast: Bool = true)->T where T : Step {
-        var last = asLast ? self.last : self
-        last.next = step
-        return step
+//    /**
+//     設定接續的step，預設會串連在 last step 後面.
+//     - parameters:
+//         - with: the next step
+//         - asLast: to be a next step after last step
+//     */
+//    @discardableResult
+//    public func `continue`<T>(with step:T, asLast: Bool = true)->T where T : Step {
+//        var last = asLast ? self.last : self
+//        last.next = step
+//        return step
+//    }
+    public func run(with inputs: Intent...) async throws ->Intents {
+        return try await self.run(with: Intents(array: inputs))
     }
-
 }
 
 //MARK: - protocol Propagatable
 
-public protocol Propagatable : Step{
+public protocol Workable{
     var duties: [Duty] { get }
     
 //    init(duties: [Duty])
-    func run(with intents: Intents, direction: Duty.PropagationDirection)
+//    func run(with intents: Intents, direction: Duty.PropagationDirection)
 }
 
 //MARK: - Shareable

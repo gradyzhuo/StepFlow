@@ -9,10 +9,8 @@
 import Foundation
 
 public typealias OutputIntents = Intents
-open class SimpleStep : Step, Propagatable, Flowable, CustomStringConvertible, Identitiable {
+open class SimpleStep : Step, CustomStringConvertible, Workable, Identitiable {
     public internal(set) var duties: [Duty]
-    
-    public var previous: Step?
     
     public typealias IntentType = SimpleIntent
     
@@ -20,16 +18,6 @@ open class SimpleStep : Step, Propagatable, Flowable, CustomStringConvertible, I
         return queue.label
     }
     public lazy var name: String = self.identifier
-    
-    public var next: Step?{
-        didSet{
-            let current = self
-            next.map{ nextStep in
-                var nextStep = nextStep
-                nextStep.previous = current
-            }
-        }
-    }
     
     internal let autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency
     internal let attributes: DispatchQueue.Attributes
@@ -73,90 +61,28 @@ open class SimpleStep : Step, Propagatable, Flowable, CustomStringConvertible, I
         flowHandler = flowControl
     }
     
-    public func run(with inputs: Intent...){
-        self.run(with: Intents(array: inputs))
-    }
-    
-    public func run(with inputs: Intents = []){
-        self.run(with: inputs, direction: .forward)
+    public func run(with inputs: Intents = []) async throws ->Intents{
+        return  try await withThrowingTaskGroup(of: Intents.self, returning: [Intents].self, body: { group in
+            for duty in self.duties {
+                group.addTask {
+                    try await duty.run(with: inputs, inQueue: self.queue)
+                }
+            }
+            
+            var outcomes: [Intents] = []
+            for try await result in group {
+                outcomes.append(result)
+            }
+            return outcomes
+        }).reduce(Intents.empty){
+            $0 + $1
+        }
     }
 
-    public func run(with inputs: Intents, direction: Duty.PropagationDirection){
-        let workItem = DispatchWorkItem {
-            Task{
-                let outputs = try await withThrowingTaskGroup(of: Intents.self, returning: [Intents].self, body: { group in
-                    for duty in self.duties.filter({ $0.propagationDirection == direction }) {
-                        group.addTask {
-                            try await duty.run(with: inputs, inQueue: self.queue)
-                        }
-                    }
-                    
-                    var outcomes: [Intents] = []
-                    for try await result in group {
-                        outcomes.append(result)
-                    }
-                    return outcomes
-                }).reduce(Intents.empty){
-                    $0 + $1
-                }
-                self.actionsDidFinish(original: inputs, outputs: outputs)
-            }
-        }
-        self.queue.sync(execute: workItem)
-    }
     
     public func cancel(){
         for act in duties {
             act.cancel()
-        }
-    }
-    
-    internal func actionsDidFinish(original inputs: Intents, outputs: Intents){
-        
-        let outputs = inputs + outputs
-        
-        let control = flowHandler(outputs)
-        switch control {
-        case .repeat:
-            run(with: outputs)
-        case .cancel:
-            print("cancelled")
-        case .finish:
-            print("finished")
-        case .nextWith(let filter):
-            goNext(with: filter(outputs))
-        case .previousWith(let filter):
-            goBack(with: filter(outputs))
-        case .jumpTo(let other, let filter):
-            jump(to: other, with: filter(outputs))
-        }
-        
-    }
-    
-    
-    public func goNext(with intents: Intents){
-        if let next = next as? Propagatable {
-            next.run(with: intents, direction: .forward)
-        }else{
-            next?.run(with: intents)
-        }
-        
-    }
-    
-    public func goBack(with intents: Intents){
-        
-        if let previous = previous as? Propagatable {
-            previous.run(with: intents, direction: .backward)
-        }else{
-            previous?.run(with: intents)
-        }
-    }
-    
-    public func jump(to step: Step, with intents: Intents){
-        if let step = step as? Propagatable {
-            step.run(with: intents, direction: .forward)
-        }else{
-            step.run(with: intents)
         }
     }
     
