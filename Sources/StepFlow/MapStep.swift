@@ -7,8 +7,9 @@
 
 import Foundation
 
-open class MapStep<Value>: Step{
+open class MapStep: Step{
 //    public var duties: [Duty] = []
+    public typealias Value = [[String:String]]
     public var operation: Duty.Operation
     
     public var name: String = ""
@@ -27,8 +28,7 @@ open class MapStep<Value>: Step{
     }
     
     public func run(with inputs: Intents = []) async throws ->Intents{
-        guard let values:[Value] = inputs[wrappedCommand] else{
-            print("XXX")
+        guard let values:Value = inputs[wrappedCommand] else{
             return Intents.empty
         }
         
@@ -37,8 +37,9 @@ open class MapStep<Value>: Step{
             for (offset, duty) in duties.enumerated(){
                 group.addTask {
                     let value = values[offset]
-                    var inputs = Intents(intents: inputs)
-                    inputs[self.unwrappedCommand] = value
+                    let inputs = inputs + Intents(array: value.reduce([Intent]()) {
+                        $0 + [SimpleIntent(command: $1.key, value: $1.value)]
+                    })
                     return try await duty.run(with: inputs, inQueue: self.queue)
                 }
             }
