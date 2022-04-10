@@ -84,25 +84,19 @@ public struct Intents {
     
     //MARK: - subscript
     
-    public subscript(name: String)->IntentType? {
-        set{
-            do{
-                try self.add(intent: newValue)
-            }catch{
-                print(error)
-            }
-        }
-        
-        get{
-            return intent(for: name)
-        }
-    }
-    
     public subscript<T>(name: String)->T? {
         set{
-            let intent = SimpleIntent(command: name, value: newValue)
+            guard let notNilValue = newValue else{
+                return
+            }
+            let newIntent: Intent
+            if let intentValue = notNilValue as? Intent{
+                newIntent = SimpleIntent(command: name, value: intentValue.value)
+            }else{
+                newIntent = SimpleIntent(command: name, value: notNilValue)
+            }
             do{
-                try self.add(intent: intent)
+                try self.add(intent: newIntent)
             }catch{
                 print(error)
             }
@@ -165,13 +159,13 @@ public func +(lhs: Intents, rhs: Intents.IntentType)->Intents{
     return results
 }
 
-public func +(lhs: Intents, rhs: String)->Intents{
-    var results = Intents.empty
-    do{
-        try results.add(intents: lhs)
-        try results.add(intent: SimpleIntent(command: rhs))
-    }catch{
-        print(error)
-    }
-    return results
-}
+//public func +(lhs: Intents, rhs: String)->Intents{
+//    var results = Intents.empty
+//    do{
+//        try results.add(intents: lhs)
+//        try results.add(intent: SimpleIntent(command: rhs))
+//    }catch{
+//        print(error)
+//    }
+//    return results
+//}

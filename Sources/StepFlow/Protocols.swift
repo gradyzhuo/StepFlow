@@ -12,9 +12,9 @@ import Foundation
 
 public protocol Intent {
     var command: String { get }
-    var value: Any? { get }
+    var value: Any { get }
     
-    init(command: String, value: Any?)
+    init(command: String, value: Any)
 }
 
 

@@ -44,17 +44,17 @@ extension StepFlow.Error : ExpressibleByStringLiteral{
     }
 }
 
-extension StepFlow.Error : Intent {
-    public var command: String {
-        return name
-    }
-    
-    public var value: Any? {
-        return userInfo
-    }
-    
-    public init(command: String, value: Any? = nil) {
-        self = StepFlow.Error(name: command, reason: nil, userInfo: nil)
-    }
-    
-}
+//extension StepFlow.Error : Intent {
+//    public var command: String {
+//        return name
+//    }
+//    
+//    public var value: Any {
+//        return userInfo ?? [:]
+//    }
+//    
+//    public init(command: String, value: Any) {
+//        self = StepFlow.Error(name: command, reason: nil, userInfo: nil)
+//    }
+//    
+//}
